@@ -36,7 +36,7 @@ async function start() {
 }
 
 function loadLabeledImages() {
-  const labels = ['Brie Larson', 'Chris Evans', 'Chris Hemsworth', 'Don Cheadle', 'Jeremy Renner', 'Jude Claproth', 'Robert Downey Jr', 'Scarlett Johansson']
+  const labels = ['Brie Larson', 'Chris Evans', 'Chris Hemsworth', 'Don Cheadle', 'Jeremy Renner', 'Jude Claproth', 'Robert Downey', 'Scarlett Johansson']
   return Promise.all(
     labels.map(async label => {
       const descriptions = []
