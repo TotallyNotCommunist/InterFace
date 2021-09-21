@@ -1,52 +1,79 @@
-const imageUpload = document.getElementById('imageUpload')
+  
+const video = document.getElementById('videoInput')
 
 Promise.all([
-  faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-  faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-  faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+    faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+    faceapi.nets.faceExpressionNet.loadFromUri('/models')
 ]).then(start)
 
-async function start() {
-  const container = document.createElement('div')
-  container.style.position = 'relative'
-  document.body.append(container)
-  const labeledFaceDescriptors = await loadLabeledImages()
-  const faceMatcher = new faceapi.FaceMatcher(labeledFaceDescriptors, 0.6)
-  let image
-  let canvas
-  document.body.append('Loaded')
-  imageUpload.addEventListener('change', async () => {
-    if (image) image.remove()
-    if (canvas) canvas.remove()
-    image = await faceapi.bufferToImage(imageUpload.files[0])
-    container.append(image)
-    canvas = faceapi.createCanvasFromMedia(image)
-    container.append(canvas)
-    const displaySize = { width: image.width, height: image.height }
-    faceapi.matchDimensions(canvas, displaySize)
-    const detections = await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceDescriptors()
-    const resizedDetections = faceapi.resizeResults(detections, displaySize)
-    const results = resizedDetections.map(d => faceMatcher.findBestMatch(d.descriptor))
-    results.forEach((result, i) => {
-      const box = resizedDetections[i].detection.box
-      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
-      drawBox.draw(canvas)
-    })
-  })
+function start() {
+    document.body.append('Models Loaded')
+    
+    navigator.getUserMedia(
+        { video:{} },
+        stream => video.srcObject = stream,
+        err => console.error(err)
+    )
+    
+    console.log('video added')
+    recognizeFaces()
 }
 
-function loadLabeledImages() {
-  const labels = ['Brie Larson', 'Chris Evans', 'Chris Hemsworth', 'Don Cheadle', 'Jeremy Renner', 'Jude Claproth', 'Riley Kim', 'Robert Downey', 'Scarlett Johansson']
-  return Promise.all(
-    labels.map(async label => {
-      const descriptions = []
-      for (let i = 1; i <= 2; i++) {
-        const img = await faceapi.fetchImage(`https://raw.githubusercontent.com/TotallyNotCommunist/InterFace/master/labeled_images/${label}/${i}.jpg`)
-        const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
-        descriptions.push(detections.descriptor)
-      }
+async function recognizeFaces() {
 
-      return new faceapi.LabeledFaceDescriptors(label, descriptions)
+    const labeledDescriptors = await loadLabeledImages()
+    console.log(labeledDescriptors)
+    const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.7)
+
+
+    video.addEventListener('play', async () => {
+        console.log('Playing')
+        const canvas = faceapi.createCanvasFromMedia(video)
+        document.body.append(canvas)
+
+        const displaySize = { width: video.width, height: video.height }
+        faceapi.matchDimensions(canvas, displaySize)
+
+        
+
+        setInterval(async () => {
+            const detections = await faceapi.detectAllFaces(video).withFaceLandmarks().withFaceDescriptors().withFaceExpressions()
+
+            const resizedDetections = faceapi.resizeResults(detections, displaySize)
+
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+            faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+            const results = resizedDetections.map((d) => {
+                return faceMatcher.findBestMatch(d.descriptor)
+            })
+            results.forEach( (result, i) => {
+                const box = resizedDetections[i].detection.box
+                const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
+                drawBox.draw(canvas)
+            })
+        }, 100)
+
+
+        
     })
+}
+
+
+function loadLabeledImages() {
+  const labels = ['Brie Larson', 'Chris Evans', 'Chris Hemsworth', 'Don Cheadle', 'Jeremy Renner', 'Jude Claproth', 'Riley Kim', 'Robert Downey', 'Scarlett Johansson'] // for WebCam
+  return Promise.all(
+      labels.map(async (label)=>{
+          const descriptions = []
+          for(let i=1; i<=2; i++) {
+              const img = await faceapi.fetchImage(`https://raw.githubusercontent.com/TotallyNotCommunist/InterFace/master/labeled_images/${label}/${i}.jpg`)
+              const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
+              console.log(label + i + JSON.stringify(detections))
+              descriptions.push(detections.descriptor)
+          }
+          document.body.append(label+' Faces Loaded | ')
+          return new faceapi.LabeledFaceDescriptors(label, descriptions)
+      })
   )
 }
