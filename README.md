@@ -1,9 +1,9 @@
-# IMPORTANT: Bug Fixes
+# InterFace
+The InterFace Database
+https://towardsdatascience.com/face-recognition-using-javascript-api-face-api-js-75af10bc3dee
 
-## `navigator.getUserMedia`
+# IMPORTANT: Usage
 
-`navigator.getUserMedia` is now deprecated and is replaced by `navigator.mediaDevices.getUserMedia`. To fix this bug replace all versions of `navigator.getUserMedia` with `navigator.mediaDevices.getUserMedia`
+## Ethics
 
-## Low-end Devices Bug
-
-The video eventListener for `play` fires up too early on low-end machines, before the video is fully loaded, which causes errors to pop up from the Face API and terminates the script (tested on Debian [Firefox] and Windows [Chrome, Firefox]). Replaced by `playing` event, which fires up when the media has enough data to start playing.
+InterFace is a respository and database of every facial pictur of (to be every user soon) on the internet provide by their social media platforms and whitepage information and is meant for ethical purporses only. This Program is meant to only be used on users 18 years and up.
