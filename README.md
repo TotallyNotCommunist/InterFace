@@ -1,8 +1,9 @@
 # InterFace
 The InterFace Database
+
 https://towardsdatascience.com/face-recognition-using-javascript-api-face-api-js-75af10bc3dee
 
-# Important: Usage
+## Important: Usage
 
 ## Ethics
 
@@ -14,7 +15,4 @@ InterFace currently is able to detect and put a name to a handful of celebritys 
 
 ## Upcoming Features
 
-1- Age Detection
-2- Gender Detection
-3- Larger database
-4- More efficient profile management
+Age Detection, Gender Detection, Larger database, More efficient profile management
